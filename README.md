@@ -67,4 +67,4 @@ This project is licensed under the MIT License - see the LICENSE.txt file for de
 
 ## Aknowledgements
 
-...
+We thank the help and input from past and present members of the Systems and Synthetic Laboratory at CCG-UNAM.
