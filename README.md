@@ -12,7 +12,7 @@ This device uses a system of addressable LEDs and fluorescence filters to estima
 
 ## Documentation
 
-Instructions to assemble the device can be found [here](http://www.penamiller.com/lab/baffle/)
+Step-by-step assembly instructions can be found [here](http://www.penamiller.com/lab/baffle/)
 
 ## Authors
 
