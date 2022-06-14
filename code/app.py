@@ -1,30 +1,16 @@
-#ToDo: 
 
-#   - Integrate back light controller
 
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-import dash_table
+from dash import dash_table
 import dash_daq as daq
-import json
-import random
 import time
-import pandas as pd
-from ctypes import *
 import sys
-from time import sleep
-import os, random, shutil, datetime, time
 import re
-import argparse
-import time
-import numpy as np
-import matplotlib.pyplot as plt
-import os, random, shutil, datetime, time
 from time import sleep
-from ctypes import *
 
 #Phidget specific imports (stepper22)
 from Phidget22.Devices.DigitalInput import *
@@ -34,55 +20,37 @@ from Phidget22.PhidgetException import *
 from Phidget22.Phidget import *
 from Phidget22.Devices.DigitalInput import DigitalInput
 
-# Import needed modules from osc4py3
-from osc4py3.as_eventloop import *
-from osc4py3 import oscbuildparse
-from pythonosc import udp_client
-
 ########################## Import libraries
 
-CODE_path='./lib/'  #MyCloud/rpm/ESB_CODDE/ESBOT_data
+CODE_path='./lib/'  
 sys.path.insert(0, CODE_path)
 from baffle import *
 
 df_params=getParams()
 
-
-########################## OSC setup
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--ip", default="127.0.0.1",
-      help="The ip of the OSC server")
-parser.add_argument("--port", type=int, default=2345,
-      help="The port the OSC server is listening on")
-args = parser.parse_args()
-client = udp_client.SimpleUDPClient(args.ip, args.port)
-
-
 ########################## CSS STYLESHEETS
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.GRID])
-#app.css.append_css({'external_url': 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'})
 app.css.config.serve_locally = False
 app.css.append_css({'external_url': 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'})
 theme = {
     'dark': True,
     'detail': '#77C3E5',
-    'primary': '#77C3E5', 
+    'primary': '#77C3E5',
     'secondary': '#77C3E5'
 }
 
 ########################## Container: I/O
 body_IO = dbc.Container([
-				
+
     #Power button
     daq.PowerButton(
         id='Z_STEPPER_engage',
         on=False,
         className='dark-theme-control',
-        size=40
-    ),	
+        size=50
+    ),
 	dbc.Row([
         dbc.Col([
                 html.P("Stepper (z-pos):"),
@@ -92,8 +60,8 @@ body_IO = dbc.Container([
                 dcc.Input(
                     id='z_stepper_serial',
                     size="7",
-                    value=df_params.loc[1,'z_stepper_serial'],  
-                    placeholder=df_params.loc[1,'z_stepper_serial'],   
+                    value=df_params.loc[1,'z_stepper_serial'],
+                    placeholder=df_params.loc[1,'z_stepper_serial'],
                     style={'background-color':'#23262A','color':'#95999F'},
                 ),
             ], className="col-3"),
@@ -106,7 +74,7 @@ body_IO = dbc.Container([
             ),
             ], className="col-2"),
 
-    ],no_gutters=True,style={"margin-top":40}),
+    ],style={"margin-top":40}),
 
     dbc.Row([
 
@@ -118,8 +86,8 @@ body_IO = dbc.Container([
                 dcc.Input(
                     id='f_stepper_serial',
                     size="7",
-                    value=df_params.loc[1,'f_stepper_serial'],  
-                    placeholder=df_params.loc[1,'f_stepper_serial'],  
+                    value=df_params.loc[1,'f_stepper_serial'],
+                    placeholder=df_params.loc[1,'f_stepper_serial'],
                     style={'background-color':'#23262A','color':'#95999F'}
                 ),
             ], className="col-3"),
@@ -131,25 +99,27 @@ body_IO = dbc.Container([
               style={"padding-left":10,"padding-top":5}
             ),
         ], className="col-2"),
-    ],no_gutters=True,style={"padding-bottom":5}),
+    ],style={"padding-bottom":5}),
 
+
+    
     dbc.Row([
 
 
         dbc.Col([
-                html.P("interfaceKit:"),
+                html.P("InterfaceKit:"),
             ], className="col-7", style={"padding-left":10}),
 
         dbc.Col([
-            
+
                 dcc.Input(
                     id='interfaceKit_serial',
                     size="7",
-                    value=df_params.loc[1,'interfaceKit_serial'],  
-                    placeholder=df_params.loc[1,'interfaceKit_serial'],    
+                    value=df_params.loc[1,'interfaceKit_serial'],
+                    placeholder=df_params.loc[1,'interfaceKit_serial'],
                     style={'background-color':'#23262A','color':'#95999F'},
                 ),
-            ], className="col-3"),	
+            ], className="col-3"),
 
         dbc.Col([
             daq.Indicator(
@@ -169,35 +139,62 @@ body_IO = dbc.Container([
             html.Div(id='ledCFP_isOn', style={'display': 'none'}, children=[0]),
             html.Div(id='ledRFP_isOn', style={'display': 'none'}, children=[0]),
             html.Div(id='ledYFP_isOn', style={'display': 'none'}, children=[0]),
-        
-            dcc.Interval(id="listener", interval=500, n_intervals=0),
+
+            dcc.Interval(id="listener", interval=100, n_intervals=0),
             dcc.Interval(id="timelapse_t", interval=1000, n_intervals=0),
 
-                    
 
-			],no_gutters=True,style={"margin-bottom":20}),
+
+        ],style={"padding-bottom":5}),
+    
+
+    dbc.Row([
+
+        dbc.Col([
+                html.P("Arduino:"),
+            ], className="col-7", style={"padding-left":10}),
+
+        dbc.Col([
+                dcc.Input(
+                    id='arduino_usbport',
+                    size="7",
+                    value=df_params.loc[1,'arduino_usbport'],
+                    placeholder=df_params.loc[1,'arduino_usbport'],
+                    style={'background-color':'#23262A','color':'#95999F'}
+                ),
+            ], className="col-3"),
+
+        dbc.Col([
+            daq.Indicator(
+              id='arduino_engaged',
+              value=False,
+              style={"padding-left":10,"padding-top":5}
+            ),
+        ], className="col-2"),
+    ],style={"margin-bottom":20}),
+    
 	],style={"background-color":"#13161D","padding":10,"margin":0}, fluid=True),
 
-
+    
 
 ########################## Container: STAGE
 
 body_stage = dbc.Container([
 	dbc.Row([
 		dbc.Col([
-			
+
 			daq.Gauge(
 				  id='fpos_gauge',
 				  label='Filter Wheel',
 				  labelPosition='top',
-				  value=(df_params.loc[1,'fpos_max']-df_params.loc[1,'fpos_min'])/2,
+				  value=df_params.loc[1,'fpos_min']+(df_params.loc[1,'fpos_max']-df_params.loc[1,'fpos_min'])/2,
 				  max=df_params.loc[1,'fpos_max'],
 				  min=df_params.loc[1,'fpos_min'],
-				  size=150
+				  size=130
 				),
-											
-		], width=3, style={"margin-left":30}),
-		
+
+		], width=3, style={"margin-left":10}),
+
 		dbc.Col([
 					html.Div(
 						style={'width': '100%', 'display': 'inline-block','padding-left':20,'padding-right':20, 'padding-bottom':0,'padding-top':40},
@@ -213,64 +210,64 @@ body_stage = dbc.Container([
 								    	html.Button(id='btn-up', className='fa fa-arrow-up', style={"color":"#95999F"}),
 				            ]),
 						]),
-				    	
+
 				    	html.Div(
 							style={'width': '100%','padding-left':20,'padding-right':20,'float':'left'},
 							children=[
-								html.Div(style={'width': '33%', 'padding':0,'float':'left'}, 
+								html.Div(style={'width': '33%', 'padding':0,'float':'left'},
 								children=[
-									html.Button(id='btn-minus', className='fa fa-arrow-left', style={"color":"#95999F"}),
+									html.Button(id='btn-plus', className='fa fa-arrow-left', style={"color":"#95999F"}),
 								]),
 								html.Div(
 									style={'width': '33%', 'padding':0,'float':'left','color':'#000'},
 									children=[
 				                        html.Button(id='btn-click', className='fa fa-camera', style={"color":"#95999F"}),
                                     ]),
-								
-								html.Div(style={'width': '33%', 'padding':0,'float':'left','margin-left':2}, 
+
+								html.Div(style={'width': '33%', 'padding':0,'float':'left','margin-left':2},
 								children=[
-									html.Button(id='btn-plus', className='fa fa-arrow-right', style={"color":"#95999F"}),
+									html.Button(id='btn-minus', className='fa fa-arrow-right', style={"color":"#95999F"}),
 								]),
 						]),
-						
+
 						html.Div(style={'width': '100%', 'display': 'inline-block','padding-left':20,'padding-right':20},
 						children=[
 							html.Div(style={'width': '33%', 'padding-top':10,'padding-left':10,'float':'left'},
 									children=[
                                         daq.Slider(
                                             id='deltaJog_slider',
-                                            marks={i: '{}'.format(10 ** i) for i in range(0,3)},
+                                            marks={i: '{}'.format(10 ** i) for i in range(0,2)},
                                             size=50,
                                             min=0,
                                             max=2,
                                             value=1,
-                                            step=0.0005,
+                                            step=0.005,
                                             updatemode='drag'
                                         ),
-                                        
+
 									]),
-						
+
 				    		html.Div(style={'width': '33%', 'padding':0,'float':'left','margin-top':8},
 									children=[
 								    	html.Button(id='btn-down', className='fa fa-arrow-down', style={"color":"#95999F"}),
 									]),
 						]),
-		
+
 		], width=5),
-		
+
 		dbc.Col([
 				daq.Tank(
 					id='zpos_tank',
 					className='dark-theme-components',
-					value=50,
-					height=150,
-					min=0,
-					max=100,
+					value=5000,
+					#height=150,
+					min=1,
+					max=50000,
 					label='Vertical Axis',
 					labelPosition='top'
 				),
 		], width=3),
-	],style={"background-color":"#13161D","padding":10,"padding-bottom":25},no_gutters=True),
+	],style={"background-color":"#13161D","padding":0,"padding-left":0,"padding-bottom":63}),
 ],fluid=True,
 )
 
@@ -278,7 +275,7 @@ body_stage = dbc.Container([
 header_control=dbc.Container([
 	dbc.Row([
 		dbc.Col(["Control"
-		], 
+		],
 		style={"margin-bottom":20,"padding":5})
 	]),
 ],
@@ -290,15 +287,15 @@ body_control = dbc.Container([
 			html.P("LED"),
 
 		],width={"size": 2, "offset": 0}, style={"padding-left":20}),
-		
+
 		dbc.Col([
-			html.P("Filter"),		
+			html.P("Filter"),
 		], className="col-3",style={"padding-left":20}),
-		
+
 		dbc.Col([
 			html.P("Exposure",style={"padding-left":0}),
 		], className="col-4"),
-		
+
 		dbc.Col([
 			html.P("Set",style={"padding-left":0,"margin-left":10}),
 		], className="col-1"),
@@ -310,20 +307,20 @@ body_control = dbc.Container([
 			  on=False
 			)
 		], width={"size": 2, "offset": 0} ,style={"padding-top":5,"margin-left":0}),
-		
+
 		dbc.Col([
 			html.Button(id='btn-filterBRIGHT', children='BRIGHT',style={"color":"white","width":100,"margin-right":0}),
 		], className="col-3"),
-		
+
 		dbc.Col([
 			daq.Slider(
 				id='filterBRIGHT_slider',
 				#marks={i: '{}'.format(10 ** i) for i in range(-2,2)},
 				size=100,
-				min=-2,
+				min=-3,
 		       max=1,
-		       value=0.01,
-		       step=0.005,
+		       value=0.001,
+		       step=0.0005,
 		       updatemode='drag'
 			),
 		], className="col-3",style={"padding-top":10}),
@@ -331,11 +328,11 @@ body_control = dbc.Container([
 			html.Div(id='exposureBRIGHT',style={"padding-top":5})
 		], className="col-1"),
 		dbc.Col([
-			
-			html.Button(id='btn-set-BRIGHT', className='fa fa-angle-double-left', 
+
+			html.Button(id='btn-set-BRIGHT', className='fa fa-angle-double-left',
 				style={"width":20,"padding":0, "margin-right":0, "height":20,"margin-top":3,"color":"#95999F"}),
-			
-		], className="col-2",style={"padding-top":5,"margin-left":10}),	
+
+		], className="col-2",style={"padding-top":5,"margin-left":10}),
 	]),
 	dbc.Row([
 		dbc.Col([
@@ -344,19 +341,19 @@ body_control = dbc.Container([
 			  on=False
 			)
 		], width={"size": 2, "offset": 0} ,style={"padding-top":5,"margin-left":0}),
-		
+
 		dbc.Col([
 			html.Button(id='btn-filterDARK', children='DARK',style={"color":"DARK","width":100,"margin-right":0}),
 		], className="col-3"),
-		
+
 		dbc.Col([
 			daq.Slider(
 				id='filterDARK_slider',
 				#marks={i: '{}'.format(10 ** i) for i in range(-2,2)},
 				size=100,
-				min=-2,
+				min=-3,
 		       max=1,
-		       value=0.01,
+		       value=0.001,
 		       step=0.005,
 		       updatemode='drag'
 			),
@@ -365,11 +362,11 @@ body_control = dbc.Container([
 			html.Div(id='exposureDARK',style={"padding-top":5})
 		], className="col-1"),
 		dbc.Col([
-			
-			html.Button(id='btn-set-DARK', className='fa fa-angle-double-left', 
+
+			html.Button(id='btn-set-DARK', className='fa fa-angle-double-left',
 				style={"width":20,"padding":0, "margin-right":0, "height":20,"margin-top":3,"color":"#95999F"}),
-			
-		], className="col-2",style={"padding-top":5,"margin-left":10}),	
+
+		], className="col-2",style={"padding-top":5,"margin-left":10}),
 	]),
 	dbc.Row([
 		dbc.Col([
@@ -378,36 +375,36 @@ body_control = dbc.Container([
 			  on=False
 			)
 		], className="col-2",style={"padding-top":5}),
-		
+
 		dbc.Col([
 			  	html.Button(id='btn-filterGFP', children='GFP',style={"color":"#C2E8B8","width":100}),
 		], className="col-3"),
-		
+
 		dbc.Col([
 			daq.Slider(
 				id='filterGFP_slider',
 				#marks={i: '{}'.format(10 ** i) for i in range(-2,2)},
 				size=100,
-				min=-2,
+				min=-3,
 		       max=1,
-		       value=.01,
+		       value=0.001,
 		       step=0.005,
 		       updatemode='drag',
 			),
 		], className="col-3",style={"padding-top":10}),
-		
+
 		dbc.Col([
 			html.Div(id='exposureGFP')
 		], className="col-1",style={"padding-top":5}),
-		
+
 		dbc.Col([
-			
-			html.Button(id='btn-set-GFP', className='fa fa-angle-double-left', 
+
+			html.Button(id='btn-set-GFP', className='fa fa-angle-double-left',
 				style={"width":20,"padding":0, "margin":0, "height":20,"margin-top":3,"color":"#95999F"}),
-			
-		], className="col-1",style={"padding-top":5,"margin-left":10}),	
+
+		], className="col-1",style={"padding-top":5,"margin-left":10}),
 	]),
-	
+
 	dbc.Row([
 		dbc.Col([
 			daq.BooleanSwitch(
@@ -415,37 +412,37 @@ body_control = dbc.Container([
 			  on=False
 			)
 		], className="col-2",style={"padding-top":5}),
-		
+
 		dbc.Col([
 			html.Button(id='btn-filterRFP', children='RFP',style={"color":"#F8A39D","width":100}),
 		], className="col-3"),
-		
+
 		dbc.Col([
 			daq.Slider(
 				id='filterRFP_slider',
 				#marks={i: '{}'.format(10 ** i) for i in range(-2,2)},
 				size=100,
-				min=-2,
-		        max=1,
-		        value=0.01,
+				min=-3,
+		       max=1,
+		       value=0.001,
 		        step=0.005,
 		        updatemode='drag'
 			),
 		], className="col-3",style={"padding-top":10}),
 		dbc.Col([
 			html.Div(id='exposureRFP'),
-			
-			
-		], className="col-1",style={"padding-top":5}),	
-		
+
+
+		], className="col-1",style={"padding-top":5}),
+
 		dbc.Col([
-			
-			html.Button(id='btn-set-RFP', className='fa fa-angle-double-left', 
+
+			html.Button(id='btn-set-RFP', className='fa fa-angle-double-left',
 				style={"width":20,"padding":0, "margin":0, "height":20,"margin-top":3,"color":"#95999F"}),
-			
-		], className="col-1",style={"padding-top":5,"margin-left":10}),	
+
+		], className="col-1",style={"padding-top":5,"margin-left":10}),
 	]),
-	
+
 	dbc.Row([
 		dbc.Col([
 			daq.BooleanSwitch(
@@ -453,35 +450,35 @@ body_control = dbc.Container([
 			  on=False
 			)
 		], className="col-2",style={"padding-top":5}),
-		
+
 		dbc.Col([
 			html.Button(id='btn-filterCFP', children='CFP',style={"color":"#A5C1DB","width":100}),
 		], className="col-3"),
-		
+
 		dbc.Col([
 			daq.Slider(
 				id='filterCFP_slider',
 				#marks={i: '{}'.format(10 ** i) for i in range(-2,2)},
 				size=100,
-				min=-2,
+				min=-3,
 		       max=1,
-		       value=0.01,
+		       value=0.001,
 		       step=0.005,
 		       updatemode='drag'
 			),
 		], className="col-3",style={"padding-top":10}),
-		
+
 		dbc.Col([
 			html.Div(id='exposureCFP')
 		], className="col-1",style={"padding-top":5}),
 		dbc.Col([
-			
-			html.Button(id='btn-set-CFP', className='fa fa-angle-double-left', 
+
+			html.Button(id='btn-set-CFP', className='fa fa-angle-double-left',
 				style={"width":20,"padding":0, "margin":0, "height":20,"margin-top":3,"color":"#95999F"}),
-			
-		], className="col-1",style={"padding-top":5,"margin-left":10}),	
+
+		], className="col-1",style={"padding-top":5,"margin-left":10}),
 	]),
-	
+
 	dbc.Row([
 		dbc.Col([
 			daq.BooleanSwitch(
@@ -489,19 +486,19 @@ body_control = dbc.Container([
 			  on=False
 			)
 		], width={"size": 2, "offset": 0},style={"padding-top":5}),
-		
+
 		dbc.Col([
 			html.Button(id='btn-filterYFP', children='YFP',style={"color":"#FFFFA4","width":100}),
 		], className="col-3", style={"float":"center"}),
-		
+
 		dbc.Col([
 			daq.Slider(
 				id='filterYFP_slider',
 				#marks={i: '{}'.format(10 ** i) for i in range(-2,2)},
 				size=100,
-				min=-2,
+				min=-3,
 		       max=1,
-		       value=0.01,
+		       value=0.001,
 		       step=0.005,
 		       updatemode='drag'
 			),
@@ -510,11 +507,11 @@ body_control = dbc.Container([
 			html.Div(id='exposureYFP')
 		], className="col-1",style={"padding-top":5}),
 		dbc.Col([
-			
-			html.Button(id='btn-set-YFP', className='fa fa-angle-double-left', 
+
+			html.Button(id='btn-set-YFP', className='fa fa-angle-double-left',
 				style={"width":20,"padding":0, "margin":0, "height":20,"margin-top":3,"color":"#95999F"}),
-			
-		], className="col-1",style={"padding-top":5,"margin-left":10}),	
+
+		], className="col-1",style={"padding-top":5,"margin-left":10}),
 	]),
 ],style={"background-color":"#13161D","padding":10,"margin-top":0,"padding-left":30}, fluid=True)
 
@@ -522,32 +519,32 @@ body_control = dbc.Container([
 body_timelapse = dbc.Container([
 
      dbc.Row([
-			
-        
+
+
         dbc.Col([
-            
+
             html.Div([
                 dcc.Interval(
-                    id='interval_thermostat',
-                    interval=5*1000, # in milliseconds
+                    id='interval_temperature',
+                    interval=500, # in milliseconds
                     n_intervals=0
                 )
             ]),
-            
+
             dbc.Row([
-                dbc.Col([		
+                dbc.Col([
                   daq.LEDDisplay(
                         id='current_temperature',
-                        value="37.5"
+                        value="0.0"
                     ),
 
-			
-                 
+
+
 				], className="col-8"),
-                
-                dbc.Col([	
+
+                dbc.Col([
                     html.Div([
-                        
+
                         html.P("Heating "),
                         daq.Indicator(
                           id='incubator_on',
@@ -555,7 +552,7 @@ body_timelapse = dbc.Container([
                           value=False
                         ),
 
-                        
+
                         daq.Slider(
                             id='target_temperature',
                             min=21, max=42, value=30,
@@ -565,33 +562,69 @@ body_timelapse = dbc.Container([
                         ),
 
                     ]),
-                    
-				], className="col-4"),
-				
-			]),
-			
 
-             
+				], className="col-4"),
+
+			]),
             
+            html.Div([
+                dcc.Interval(
+                    id='interval_humidity',
+                    interval=500, # in milliseconds
+                    n_intervals=0
+                )
+            ]),
+            
+              dbc.Row([
+                dbc.Col([
+                  daq.LEDDisplay(
+                        id='current_humidity',
+                        value="0.0"
+                    ),
+
+
+
+				], className="col-8"),
+
+                dbc.Col([
+                    html.Div([
+
+                        html.P("Humidity "),
+                        daq.Indicator(
+                          id='humidity_on',
+                          color="#00cc96",
+                          value=False
+                        ),
+
+
+                        daq.Slider(
+                            id='target_humidity',
+                            min=0, max=100, value=50,
+                            handleLabel={"showCurrentValue": True,"label": "target"},
+                            step=1,
+                            marks={'0': '0%', '50': '50%', '100': '100%'}
+                        ),
+
+                    ]),
+
+				], className="col-4"),
+
+			]),
+
+
+
+
         ], className="col-6"),
-        
-         
-         dbc.Col([
-    
-                html.P("Time before next cycle:", style={"padding-top":30}),
-					daq.LEDDisplay(
-					id='timer_display',
-					value="88:88"
-				),
-        ], className="col-9"),
-    
-    
+
+
+
+
 			]),
 
 	dbc.Row([
-		dbc.Col([		
+		dbc.Col([
 			dbc.Row([
-			
+
 				dbc.Col([
 					dcc.Checklist(
 						id='incubator_checkbox',
@@ -602,44 +635,44 @@ body_timelapse = dbc.Container([
 					    value=[]
 					)
 				], className="col-12"),
-				
+
 			]),
             dbc.Row([
-			
+
 				dbc.Col([
 					dcc.Checklist(
-						id='defrost_checkbox',
+						id='humidity_checkbox',
 					    options=[
-					        {'label': ' Defrost', 'value': 'defrostON'},
+					        {'label': ' Humidity', 'value': 'humidityON'},
 					    ],
 					    style={"padding-left":15,"font-size":12,"display":"none"},
 					    value=[]
 					)
 				], className="col-12"),
-				
+
 			]),
-			
-			
+
+
 		], width={"size": 6, "offset": 0}),
-		
-		
-		
-		
+
+
+
+
 	],style={"margin-bottom":0,"margin-top":10}),
-	
+
 ],style={"background-color":"#13161D","padding":10,"margin-top":0}, fluid=True
 )
 
 
 body_buttons = dbc.Container([
-   
-    
+
+
     dbc.Row([
-			
+
 				dbc.Col([
 					html.P("Interval (seconds):", style={"padding-left":15,"text-align":"right"}),
 				], className="col-9"),
-				
+
 				dbc.Col([
                     dcc.Input(
 								id='cycles_input',
@@ -647,7 +680,7 @@ body_buttons = dbc.Container([
                                 value=1000,
                                 style={'display': 'none'},
 							),
-                    
+
 					dcc.Input(
 						id='interval_input',
 						size="6",
@@ -655,13 +688,13 @@ body_buttons = dbc.Container([
 				  		style={'background-color':'#23262A','color':'#95999F',"text-align":"right",'margin-right':'20px'}
 					),
 				], className="col-3"),
-				
+
 			]),
 
-    
+
 	dbc.Row([
 			dbc.Col([
-                
+
                 #TABLE
                 html.Div([
 
@@ -678,7 +711,7 @@ body_buttons = dbc.Container([
                         style_as_list_view=True,
                         style_cell={
                             'padding': '5px',
-                            'backgroundColor': '#13161D', 
+                            'backgroundColor': '#13161D',
                             'font-size':12,
                         },
                         style_header={
@@ -688,17 +721,17 @@ body_buttons = dbc.Container([
                         row_deletable=True
                     ),
 
-                    
+
 
                 ]),
-                
+
                 html.Button('Add', id='add_config-button',style={"width":100}, n_clicks=0),
 				html.Button(id='btn-runOne', children='Run 1',style={"width":100}),
 				html.Button(id='btn-runtimelapse', children='Loop',style={"width":100}),
 				html.Button(id='btn-stop', children='Stop',style={"width":100}),
-				
+
 				html.P("Progress:",style={"margin-top":10}),
-					
+
 				daq.GraduatedBar(
 					id='ncycles_progressbar',
 					value=4
@@ -707,12 +740,24 @@ body_buttons = dbc.Container([
 				    id='runtimelapse_output',
 					style={"padding":0,"margin":0,"font-size":10},
                 ),
+
                 
-							
-			
-			], 
-			style={"margin-bottom":20,"padding":15,"margin-top":0}, className="col-12")
-		],no_gutters=True),
+
+
+			],
+			style={"margin-bottom":20,"padding":15,"margin-top":0}, className="col-12"),
+		
+        
+         dbc.Col([
+
+                html.P("Time before next cycle:", style={"padding-top":30}),
+					daq.LEDDisplay(
+					id='timer_display',
+					value="00:10"
+				),
+        ], className="col-9"),
+    
+    ]),
 
 
 ],style={"background-color":"#13161D","padding":10,"margin-top":0}, fluid=True,)
@@ -720,18 +765,18 @@ body_buttons = dbc.Container([
 
 
 body_rgb = dbc.Container([
-    
+
 	dbc.Row([
-          
+
             dbc.Col([
-                
-                
-			], 
+
+
+			],
 			style={"margin-top":20,"padding":0,"text-align":"left"}, className="col-2"),
-            
-        
+
+
 			dbc.Col([
-                
+
                 dcc.RadioItems(
                     id='LEDsegment',
                     options=[
@@ -747,13 +792,13 @@ body_rgb = dbc.Container([
                     ],
                     value='all',
                     style={'color':'#95999F', 'font-size':14},
-                ), 
-                
-               
-                
-			], 
+                ),
+
+
+
+			],
 			style={"margin-top":20,"padding":0,"text-align":"left"}, className="col-2"),
-            
+
             dbc.Col([
                 daq.ColorPicker(
                     id='LEDcolor',
@@ -761,10 +806,10 @@ body_rgb = dbc.Container([
                     size=164,
                     value=dict(rgb=dict(r=255, g=255, b=255, a=1))
                 )
-            ], 
+            ],
 			style={"margin-bottom":0,"padding":0,"margin-top":0,"text-align":"center"}, className="col-8"),
-		],no_gutters=True),
-    
+		]),
+
 
 
 ],style={"background-color":"#13161D","padding":10,"margin-top":-15,"margin-left":15}, fluid=True,)
@@ -774,7 +819,7 @@ body_hidden = dbc.Container([
 	dbc.Row([
 			dbc.Col([
 				#html.P("Input:"),
-				
+
 				dbc.Row([
 					dbc.Col([
 						html.P("stepper (filter-pos)",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -786,9 +831,9 @@ body_hidden = dbc.Container([
 							style={'color':'#95999F', 'font-size':10,"display": "none"},
 						),
 					], width={"size": 3}),
-					
+
 				],style={"padding":0,"margin-top":0}),
-			
+
 				dbc.Row([
 					dbc.Col([
 						html.P("stepper (z-pos) ",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -798,13 +843,13 @@ body_hidden = dbc.Container([
 							id='z_stepper_input',
                             children=['0'],
 							style={'color':'#95999F', 'font-size':10,"display": "none"},
-						),	
+						),
 					], width={"size": 3}),
-					
+
 				],style={"padding":0,"margin-top":0}),
-				
-                
-                
+
+
+
 				dbc.Row([
 					dbc.Col([
 						html.P("Timer ",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -814,11 +859,11 @@ body_hidden = dbc.Container([
 							id='timer_input',
 						    children=[None],
 							style={'color':'#95999F', 'font-size':10,"display": "none"},
-						),	
+						),
 					], width={"size": 3}),
-					
-				],style={"padding":0,"margin-top":0}),	
-                
+
+				],style={"padding":0,"margin-top":0}),
+
 				dbc.Row([
 					dbc.Col([
 						html.P("Cycles ",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -828,11 +873,11 @@ body_hidden = dbc.Container([
 							id='ncycles_input',
 						    children=[None],
 							style={'color':'#95999F', 'font-size':10,"display": "none"},
-						),	
+						),
 					], width={"size": 3}),
-					
-				],style={"padding":0,"margin-top":0}),	
-                
+
+				],style={"padding":0,"margin-top":0}),
+
                 dbc.Row([
 					dbc.Col([
 						html.P("timelapse start ",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -842,11 +887,11 @@ body_hidden = dbc.Container([
 							id='timelapse_start',
 						    children=[-1],
 							style={'color':'#95999F', 'font-size':10,"display": "none"},
-						),	
+						),
 					], width={"size": 3}),
-					
+
 				],style={"padding":0,"margin-top":0}),
-                
+
                 dbc.Row([
 					dbc.Col([
 						html.P("timelapse end ",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -856,7 +901,7 @@ body_hidden = dbc.Container([
 							id='timelapse_end',
 						    children=[-1],
 							style={'color':'#95999F', 'font-size':10,'display': 'none'},
-						),	
+						),
 					], width={"size": 3}),
 				],style={"padding":0,"margin-top":0}),
 
@@ -869,11 +914,11 @@ body_hidden = dbc.Container([
 							id='timelapse_stop',
 						    children=[False],
 							style={'color':'#95999F', 'font-size':10,'display': 'none'},
-						),	
+						),
 					], width={"size": 3}),
 				],style={"padding":0,"margin-top":0}),
-                    
-                                
+
+
                 dbc.Row([
 					dbc.Col([
 						html.P("timelapse click",style={"padding":0,"margin":0,"margin-top":4,"font-size":10,"display": "none"}),
@@ -883,10 +928,10 @@ body_hidden = dbc.Container([
 							id='timelapse_click',
 						    children=[False],
 							style={'color':'#95999F', 'font-size':10,'display': 'none'},
-						),	
+						),
 					], width={"size": 3}),
 				],style={"padding":0,"margin-top":0}),
-				
+
 				dbc.Row([
 					dbc.Col([
 						html.P("",style={"padding":0,"margin":0,"margin-top":2,"font-size":10,"display": "none"}),
@@ -899,16 +944,16 @@ body_hidden = dbc.Container([
 						),
 					], width={"size": 6}),
 				],style={"padding":0,"margin-top":0}),
-			
-				
-				
-				
+
+
+
+
 			], width={"size": 6, "offset": 0}),
-			dbc.Col([	
-				
+			dbc.Col([
+
 				html.P("Presets:"),
-				
-                
+
+
 				dbc.Row([
 					dbc.Col([
 						html.P("BRIGHT: ",style={"padding":0,"margin":0,"margin-top":2,"font-size":10,"display": "none"}),
@@ -921,7 +966,7 @@ body_hidden = dbc.Container([
 						),
 					], width={"size": 6}),
 				],style={"padding":0,"margin-top":0}),
-                
+
 				dbc.Row([
 					dbc.Col([
 						html.P("DARK: ",style={"padding":0,"margin":0,"margin-top":2,"font-size":10,"display": "none"}),
@@ -934,8 +979,8 @@ body_hidden = dbc.Container([
 						),
 					], width={"size": 6}),
 				],style={"padding":0,"margin-top":0}),
-				
-				
+
+
 				dbc.Row([
 					dbc.Col([
 						html.P("GFP: ",style={"padding":0,"margin":0,"margin-top":2,"font-size":10,"display": "none"}),
@@ -960,7 +1005,7 @@ body_hidden = dbc.Container([
 							id='fpos_RFP',
 							style={"padding":0,"margin":0,"font-size":10,"display": "none"},
 							children=40,
-						),	
+						),
 					], width={"size": 6}),
 				],style={"padding":0,"margin-top":0}),
 
@@ -991,7 +1036,7 @@ body_hidden = dbc.Container([
 						),
 					], width={"size": 6}),
 				],style={"padding":0,"margin-top":0}),
-                
+
                 dbc.Row([
 					dbc.Col([
 						html.P("color ",style={"padding":0,"margin":0,"margin-top":2,"font-size":10,"display": "none"}),
@@ -1004,17 +1049,17 @@ body_hidden = dbc.Container([
 						),
 					], width={"size": 6}),
 				],style={"padding":0,"margin-top":0}),
-                            
-			
+
+
 			], style={"margin-bottom":20,"padding":5,"margin-top":0,"display": "none"}, width={"size": 4, "offset": 1})
-        
-        
-        
-        
-		],no_gutters=True),
+
+
+
+
+		]),
 ])
-										
-										
+
+
 #############
 
 body_layout = dbc.Container([
@@ -1027,7 +1072,7 @@ body_layout = dbc.Container([
 		 	html.Div(body_stage)
 		],className="col-9",style={"padding":0}),
 	]),
-	
+
 	dbc.Row([
 		dbc.Col([
 		 	html.Div(body_control)
@@ -1051,46 +1096,154 @@ body_layout = dbc.Container([
 		 	html.Div(body_hidden)
 		],className="col-6",style={"padding":15}),
 	]),
-	
+
 ])
-	
-	
+
+
 #Dark mode
 app.layout = html.Div(id='dark-theme-components', children=[
 	daq.DarkThemeProvider(theme=theme, children=body_layout)
-	])	
-	
+	])
+
 #app.layout = html.Div(body_layout)
 
 
-############# INCUBATOR (THERMOSTAT)
+############# INCUBATOR (HUMIDITY)
+
+@app.callback(Output('interval_humidity', 'n_intervals'),[Input('arduino_engaged','value')])
+def interval_update(input_1): # add other args for additional inputs
+    return 0
+
+@app.callback(Output('current_humidity', 'value'),
+         [Input('interval_humidity', 'n_intervals')], [State('arduino_engaged','value'),State('current_humidity', 'value')])
+
+def update_current(n, arduino_engaged, str_humidity):
+    
+    this_humidity=float(str_humidity)
+    
+    if arduino_engaged:
+        try:
+            serialStr="<\"humi\">"
+            #print("Sending to serial: ",serialStr)
+        
+            #Here we send data to arduino via serial
+            arduino.write(serialStr.encode())
+            
+            #Now read serial
+            serial_line=str(arduino.read(9))
+            
+            tag = re.search('H(.+?)I', serial_line)
+            if tag:
+                serial_tag = tag.group(1)
+            
+                serial_data=re.findall(r"[-+]?\d*\.\d+|\d+", serial_tag)
+                serial_humidity=float(serial_data[-1])
+
+                #print("* Updating humidity ==> ", serial_humidity, chr(37))
+                this_humidity=serial_humidity
+                
+                #sleep(1)
+                
+        except serial.serialutil.SerialException as e:
+            return str(this_humidity)
+        except:
+            return str(this_humidity)
+       
+    if this_humidity<0:
+        this_humidity=0
+            
+    return str(this_humidity)
+
+
+@app.callback(Output('humidity_on', 'value'),
+         [Input('current_humidity','value')], [State('target_humidity', 'value'), State('interfaceKit_engaged','value'), State('arduino_engaged','value')])
+
+def update_humidity(current_humidity, target_humidity, interfaceKit_engaged, arduino_engaged):
+
+    if interfaceKit_engaged and arduino_engaged:
+        
+        outputHUMID=df_params.loc[1,'output_humidity']
+        #print("Humid: %s : %s"%(current_humidity, target_humidity))
+        
+        
+        if float(target_humidity)<float(current_humidity): #Turn on
+            if float(current_humidity)>0:
+                HUMIDITY_turnON(interfaceKit_output, outputHUMID)
+                #sleep(100)
+                return False
+        else:
+
+            HUMIDITY_turnOFF(interfaceKit_output, outputHUMID)
+        
+    return True
+
+############# INCUBATOR (TEMPERTURE)
+
+@app.callback(Output('interval_temperature', 'n_intervals'),[Input('arduino_engaged','value')])
+def interval_update(input_1): 
+    sleep(1)    
+    
+    return 0
 
 @app.callback(Output('current_temperature', 'value'),
-         [Input('interval_thermostat', 'n_intervals')])
+         [Input('interval_temperature', 'n_intervals')], [State('arduino_engaged','value'),State('current_temperature', 'value')])
+
+def update_current(n, arduino_engaged, str_temperature):
+    
+    this_temperature=float(str_temperature)
+    
+    if arduino_engaged:
+        try:
+            serialStr="<\"temp\">"
+            #print("Sending to serial: ",serialStr)
         
-def update_current(n):
-    serial_data = str(arduino.readline(), "utf-8").split('/')
-    serial_temperature=float(serial_data[0])
-    serial_humidity=float(serial_data[1]) 
-    print("%0.2fC / %0.2f%s  "%((serial_temperature), (serial_humidity), chr(37)))
-    return serial_temperature
+            #Here we send data to arduino via serial
+            arduino.write(serialStr.encode())
+            
+            #Now read serial
+            serial_line=str(arduino.read(9))
+            
+            tag = re.search('C(.+?)D', serial_line)
+            if tag:
+                serial_tag = tag.group(1)
+                serial_data=re.findall(r"[-+]?\d*\.\d+|\d+", serial_tag)
+                serial_temperature=float(serial_data[-1])
+
+                this_temperature=serial_temperature
+                #print("* Updating temperature ==> ", this_temperature, 'C')
+                #sleep(1)
+                
+        except serial.serialutil.SerialException as e:
+            return str(this_temperature)
+        except:
+            return str(this_temperature)
+       
+    if this_temperature<0:
+        this_temperature=0
+            
+    return str(this_temperature)
 
 @app.callback(Output('incubator_on', 'value'),
-         [Input('interval_thermostat', 'n_intervals')], [State('current_temperature', 'value'),  State('target_temperature', 'value'), State('interfaceKit_engaged','value')])
-        
-def update_incubator(n, current_temperature, target_temperature, interfaceKit_engaged):
-    
-    if interfaceKit_engaged:
-        outputHEAT=df_params.loc[1,'output_incubator']
-        #print(" %s : %s"%(current_temperature, target_temperature))
-        if float(target_temperature)>float(current_temperature): #Turn on
-            HEAT_turnON(interfaceKit_output, outputHEAT)
-            return True
+         [Input('current_temperature', 'value')], [State('target_temperature', 'value'), State('interfaceKit_engaged','value'), State('arduino_engaged','value')])
 
-        HEAT_turnOFF(interfaceKit_output, outputHEAT)
+def update_incubator(current_temperature, target_temperature, interfaceKit_engaged, arduino_engaged):
+
+    if interfaceKit_engaged and arduino_engaged:
         
-    return False
-    
+        outputHEAT=df_params.loc[1,'output_incubator']
+        #print("Temp: %s : %s"%(current_temperature, target_temperature))
+        
+        
+        if float(target_temperature)<float(current_temperature): #Turn on
+            if float(current_temperature)>0:
+                HEAT_turnON(interfaceKit_output, outputHEAT)
+                #sleep(100)
+                return False
+        else:
+            HEAT_turnOFF(interfaceKit_output, outputHEAT)
+        
+    return True
+
 
 ############# TABLE OPTICAL CONFIGURATIONS
 @app.callback(
@@ -1103,13 +1256,13 @@ def add_row(n_clicks, rows, columns, ledBRIGHT, ledDARK, ledGFP, ledRFP, ledCFP,
         str_opt_config=''
         if ledBRIGHT:
             str_opt_config+='BRIGHT (%gs)'%transform_value(exposureBRIGHT)
-            
+
         if ledDARK:
             if str_opt_config!='':
                 str_opt_config+=" / "
             strLED=' #%02x%02x%02x, a=%g' % (colorLED['rgb']['r'], colorLED['rgb']['g'], colorLED['rgb']['b'],colorLED['rgb']['a'])
             str_opt_config+='DARK (%gs,%s)'%(transform_value(exposureDARK),strLED)
-            
+
         if ledGFP:
             if str_opt_config!='':
                 str_opt_config+=" / "
@@ -1126,13 +1279,13 @@ def add_row(n_clicks, rows, columns, ledBRIGHT, ledDARK, ledGFP, ledRFP, ledCFP,
             if str_opt_config!='':
                 str_opt_config+=" / "
             str_opt_config+='YFP (%gs)'%transform_value(exposureYFP)
-        
+
         if str_opt_config!="":
             rows.append({c['id']: str_opt_config for c in columns})
-            
+
         #else:
         #    rows.append({c['id']: 'N/A' for c in columns})
-            
+
     return rows
 
 
@@ -1140,64 +1293,65 @@ def add_row(n_clicks, rows, columns, ledBRIGHT, ledDARK, ledGFP, ledRFP, ledCFP,
 @app.callback(Output('ledDARK_isOn', 'children'),
               [Input('ledDARK_switch', 'on')], [State('interfaceKit_engaged','value'),State('LEDcolor','value'),State('LEDsegments_color','children')])
 def toggle_switch(isOn, engaged, colorLED, LEDsegment_str):
+    #return False
     if engaged:
-        
+
         strLED='DARK'
         outputLED=df_params.loc[1,'output_filterDARK']
-        port=df_params.loc[1,'output_portDARK']
-        ip=df_params.loc[1,'output_ipDARK']
-        
+        #port=df_params.loc[1,'output_portDARK']
+        #ip=df_params.loc[1,'output_ipDARK']
+
         if isOn:
             isOn=LED_turnON(interfaceKit_output, strLED, colorLED, outputLED)
-        
+
             #Here we communicate with protopixel
-            for i in range(1,9):
-                cmd_enable='/Program/segment%s/enabled/'%i
-                client.send_message(cmd_enable, [1])
-                
-            #isOn=True
+    #        for i in range(1,9):
+    #            cmd_enable='/Program/segment%s/enabled/'%i
+    #            client.send_message(cmd_enable, [1])
+
+            isOn=True
         else:
             isOn=LED_turnOFF(interfaceKit_output, strLED, colorLED, outputLED)
-            for i in range(1,9):
-                cmd_disable='/Program/segment%s/enabled/'%i
-                client.send_message(cmd_disable, [0])
-                
+    #        for i in range(1,9):
+    #            cmd_disable='/Program/segment%s/enabled/'%i
+    #            client.send_message(cmd_disable, [0])
+
             isOn=False
     return isOn
-    
-    finished = False
-    while not finished:
-        osc_process()
-    osc_terminate()
-    
-    
+
+    #finished = False
+    #                                     while not finished:
+    #    osc_process()
+    #osc_terminate()
+
+
 
 
 @app.callback(Output('LEDsegments_color', 'children'),
-              [Input('LEDcolor', 'value')], [State('LEDsegment','value')])
+              [Input('LEDcolor', 'value')], [State('LEDsegment','value'), State('arduino_engaged','value'), State('ledDARK_switch', 'on')])
 
-def setValue(thisLEDcolor, thisLEDsegment):
-    
+def setValue(thisLEDcolor, thisLEDsegment, arduino_engaged, ledDARK_isOn):
+  
     val_colorR=int(thisLEDcolor['rgb']['r'])
     val_colorG=int(thisLEDcolor['rgb']['b'])
     val_colorB=int(thisLEDcolor['rgb']['g'])
     val_colorA=int(255*float(thisLEDcolor['rgb']['a']))
-    
-    
-    #Here we communicate with protopixel
+
+    strLED='DARK'
+    outputLED=df_params.loc[1,'output_filterDARK']
+
+    #Here we communicate with fastLED via Arduino
     #print('\nUpdating color of segments: %s'%thisLEDsegment)
     for i in range(1,9):
         if thisLEDsegment == 'all' or (thisLEDsegment==str(i)):
+            if arduino_engaged and ledDARK_isOn:  
+                isOn=LED_turnON(interfaceKit_output, strLED, thisLEDcolor, outputLED)
 
-            cmd_color='/Program/segment%s/params/color'%i
-            val_color=[val_colorR,val_colorG,val_colorB,val_colorA]
-            client.send_message(cmd_color, val_color)
-    
     ret='(%s,%s,%s,%s)'%(val_colorR,val_colorG,val_colorB, val_colorA)
-    
+
     return ret
-    
-    
+
+
 @app.callback(Output('ledBRIGHT_isOn', 'children'),
               [Input('ledBRIGHT_switch', 'on')], [State('interfaceKit_engaged','value')])
 
@@ -1209,8 +1363,8 @@ def toggle_switch(isOn, engaged):
             isOn=LED_turnON(interfaceKit_output, strLED, 'BRIGHT', outputLED)
         else:
             isOn=LED_turnOFF(interfaceKit_output, strLED, 'BRIGHT', outputLED)
-    return isOn  
-    
+    return isOn
+
 @app.callback(Output('ledGFP_isOn', 'children'),
               [Input('ledGFP_switch', 'on')], [State('interfaceKit_engaged','value')])
 
@@ -1223,7 +1377,7 @@ def toggle_switch(isOn, engaged):
         else:
             isOn=LED_turnOFF(interfaceKit_output, strLED, 'GFP', outputLED)
     return isOn
-	
+
 @app.callback(Output('ledCFP_isOn', 'children'),
               [Input('ledCFP_switch', 'on')], [State('interfaceKit_engaged','value')])
 def toggle_switch(isOn, engaged):
@@ -1246,7 +1400,7 @@ def toggle_switch(isOn, engaged):
         else:
             isOn=LED_turnOFF(interfaceKit_output, strLED, 'RFP', outputLED)
     return isOn
-	
+
 @app.callback(Output('ledYFP_isOn', 'children'),
               [Input('ledYFP_switch', 'on')], [State('interfaceKit_engaged','value')])
 def toggle_switch(isOn, engaged):
@@ -1265,7 +1419,7 @@ def transform_value(value):
 	if val>=1.0:
 		ret=round(val*10)/10
 	else:
-		ret=round(val*100)/100
+		ret=round(val*1000)/1000
 	return ret
 
 @app.callback(Output('exposureBRIGHT', 'children'),
@@ -1275,9 +1429,9 @@ def display_value(value):
     if val>=1.0:
     	ret='{:0.1f}s'.format(val)
     else:
-    	ret='{:0.2f}s'.format(val)
+    	ret='{:0.3f}s'.format(val)
     return ret
-    
+
 @app.callback(Output('exposureDARK', 'children'),
               [Input('filterDARK_slider', 'value')])
 def display_value(value):
@@ -1285,7 +1439,7 @@ def display_value(value):
 	if val>=1.0:
 		ret='{:0.1f}s'.format(val)
 	else:
-		ret='{:0.2f}s'.format(val)
+		ret='{:0.3f}s'.format(val)
 	return ret
 
 @app.callback(Output('exposureGFP', 'children'),
@@ -1295,9 +1449,9 @@ def display_value(value):
     if val>=1.0:
     	ret='{:0.1f}s'.format(val)
     else:
-    	ret='{:0.2f}s'.format(val)
+    	ret='{:0.3f}s'.format(val)
     return ret
-    
+
 @app.callback(Output('exposureCFP', 'children'),
               [Input('filterCFP_slider', 'value')])
 def display_value(value):
@@ -1305,9 +1459,9 @@ def display_value(value):
     if val>=1.0:
     	ret='{:0.1f}s'.format(val)
     else:
-    	ret='{:0.2f}s'.format(val)
+    	ret='{:0.3f}s'.format(val)
     return ret
-    
+
 @app.callback(Output('exposureYFP', 'children'),
               [Input('filterYFP_slider', 'value')])
 def display_value(value):
@@ -1315,9 +1469,9 @@ def display_value(value):
     if val>=1.0:
     	ret='{:0.1f}s'.format(val)
     else:
-    	ret='{:0.2f}s'.format(val)
+    	ret='{:0.3f}s'.format(val)
     return ret
-    
+
 @app.callback(Output('exposureRFP', 'children'),
               [Input('filterRFP_slider', 'value')])
 def display_value(value):
@@ -1325,47 +1479,46 @@ def display_value(value):
     if val>=1.0:
     	ret='{:0.1f}s'.format(val)
     else:
-    	ret='{:0.2f}s'.format(val)
+    	ret='{:0.3f}s'.format(val)
     return ret
-    
+
 #############
-@app.callback([Output('z_stepper_engaged','value'),Output('f_stepper_engaged','value'),Output('interfaceKit_engaged','value')], [Input('Z_STEPPER_engage', 'on')], [State('f_stepper_serial','value'), State('z_stepper_serial','value'), State('interfaceKit_serial','value')])
-def engage(isOn, f_stepper_serial, z_stepper_serial, interfaceKit_serial): 
+@app.callback([Output('z_stepper_engaged','value'),Output('f_stepper_engaged','value'),Output('interfaceKit_engaged','value'),Output('arduino_engaged','value')], [Input('Z_STEPPER_engage', 'on')], [State('f_stepper_serial','value'), State('z_stepper_serial','value'), State('interfaceKit_serial','value'), State('arduino_usbport','value')])
+def engage(isOn, f_stepper_serial, z_stepper_serial, interfaceKit_serial, arduino_usbport):
     ret_baffle=False
     ret_filter=False
     ret_interfaceKit=False
+    ret_arduino=False
     if isOn==True:
-        
-        
+
+
         ret_baffle=Z_STEPPER_engage(int(z_stepper_serial))
         #sleep(1)
-        
+
         ret_filter=F_STEPPER_engage(int(f_stepper_serial))
         #sleep(2)
-        
-        
+
+
         ret_interfaceKit=INTERFACEKIT_engage(int(interfaceKit_serial))
         #sleep(1)
-        
-        
-        #if ret_filter:
-        #    F_STEPPER_setHome()
-            
-        #if ret_baffle:
-        #    Z_STEPPER_setHome()
-        
-    else:
-        ret_baffle=Z_STEPPER_disengage() 
-        ret_filter=F_STEPPER_disengage() 
-        ret_interfaceKit=INTERFACEKIT_disengage() 
-        
 
-        f_stepper=Stepper() #??
-        z_stepper=Stepper() #??
-        
-    
-    print([ret_baffle, ret_filter, ret_interfaceKit])
-    return [ret_baffle, ret_filter, ret_interfaceKit]
+        ret_arduino=ARDUINO_engage(arduino_usbport)
+        sleep(1)
+        F_STEPPER_setHome()
+        Z_STEPPER_setHome()
+
+    else:
+        ret_baffle=Z_STEPPER_disengage()
+        ret_filter=F_STEPPER_disengage()
+        ret_interfaceKit=INTERFACEKIT_disengage()
+        ret_arduino=ARDUINO_disengage()
+
+        f_stepper=Stepper()
+        z_stepper=Stepper() 
+
+
+    #print([ret_baffle, ret_filter, ret_interfaceKit, ret_arduino])
+    return [ret_baffle, ret_filter, ret_interfaceKit, ret_arduino]
 
 #############
 @app.callback(Output('timer_display','value'), [Input('timer_input', 'children')])
@@ -1380,20 +1533,18 @@ def read_params(t_sec):
 def read_params(cached_data):
     cached_df = pd.read_json(cached_data)
     zpos=cached_df['zpos'][1]
-    return zpos 
-    
+    return zpos
+
 #############
-@app.callback(Output('fpos_gauge','value'), [Input('fpos_var', 'children')])
-def read_params(cached_data):
-    fpos=0
-    if with_f_stepper:
-        cached_df = pd.read_json(cached_data)
-        fpos=cached_df['fpos'][1]
-        
-    return fpos
-    
-    
-############# 
+#@app.callback(Output('fpos_gauge','value'), [Input('fpos_var', 'children')])
+#def read_params(cached_data):
+#    cached_df = pd.read_json(cached_data)
+#    fpos=cached_df['fpos'][1]#
+#
+#    return fpos
+
+
+#############
 @app.callback(Output('zpos_var', 'children'),
               [Input('btn-home', 'n_clicks'),
                Input('btn-up', 'n_clicks'),
@@ -1401,7 +1552,7 @@ def read_params(cached_data):
                Input('z_stepper_input', 'children')], [State('deltaJog_slider','value'), State("z_stepper_engaged", "value")])
 
 def update(btn1, btn2, btn3, zpos_target, zpos_delta, engaged):
-    
+
     if engaged and with_z_stepper:
 
         ctx = dash.callback_context
@@ -1410,45 +1561,61 @@ def update(btn1, btn2, btn3, zpos_target, zpos_delta, engaged):
         max_zpos=df_params.loc[1,'zpos_max']
         current_zpos=df_params.loc[1,'zpos']
         next_zpos=current_zpos
-            
-        if not ctx.triggered:
-            button_id = 'No clicks yet'
-            next
-        else:
-            button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-        if button_id == 'btn-up':
+        try:
+            if not ctx.triggered:
+                button_id = 'No clicks yet'
+                next
+            else:
+                button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            next_zpos=current_zpos+10*(10 ** (1+zpos_delta))
-            print('jog up: next_zpos=',next_zpos)
-            ##if next_zpos<min_zpos:
-            #    next_zpos=min_zpos
-            #    print('min_zpos!')
+            if button_id == 'btn-up':
 
-            Z_STEPPER_moveTo(next_zpos)
+                next_zpos=current_zpos+10*(10 ** (1+zpos_delta))
+                #print('jog up: next_zpos=',next_zpos)
+                
+                if next_zpos>max_zpos:
+                    next_zpos=max_zpos
+                    #print('- max_zpos!')
+                elif next_zpos<min_zpos:
+                    next_zpos=min_zpos
+                    #print('- min_zpos!')
+
+                Z_STEPPER_moveTo(next_zpos)
 
 
-        elif button_id == 'btn-down':
-            
-            next_zpos=current_zpos-(10 ** (1+zpos_delta))
-            
-            print('jog down: next_zpos=',next_zpos)
-            #if next_zpos>max_zpos:
-            #    next_zpos=max_zpos
-            #    print('max_zpos!')
+            elif button_id == 'btn-down':
 
-            Z_STEPPER_moveTo(next_zpos)
+                next_zpos=current_zpos-10*(10 ** (1+zpos_delta))
 
-        #elif button_id == 'btn-home':
-        #    Z_STEPPER_setHome()  #this triggers at start?!!
-            #df_params['zpos'][1]=0
-        #else:
-            #df_params['zpos'][1]=current_zpos
+                print('jog down: next_zpos=',next_zpos)
+                
+                if next_zpos>max_zpos:
+                    next_zpos=max_zpos
+                    #print('- max_zpos!')
+                elif next_zpos<min_zpos:
+                    next_zpos=min_zpos
+                    #print('- min_zpos!')
 
-        
+                Z_STEPPER_moveTo(next_zpos)
+
+            elif button_id == 'btn-home':
+                
+                Z_STEPPER_setHome()  #this triggers at start?!!
+                #next_zpos=0
+                #df_params['zpos'][1]=0.0
+            #else:
+                #df_params['zpos'][1]=current_zpos
+                
+        except PhidgetException as e:
+            print("Error in Detach Event:", e)
+            return
+        except Exception as e:
+            return
+
         df_params.loc[1,'zpos']=next_zpos
-    return df_params.to_json() 
-	
+    return df_params.to_json()
+
 ################
 @app.callback(Output('fpos_var', 'children'),
               [Input('btn-home', 'n_clicks'),
@@ -1460,143 +1627,181 @@ def update(btn1, btn2, btn3, zpos_target, zpos_delta, engaged):
                Input('btn-filterRFP','n_clicks'),
                Input('btn-filterCFP','n_clicks'),
                Input('btn-filterYFP','n_clicks'),
-               Input('f_stepper_input', 'children')], [State('deltaJog_slider','value'), State("f_stepper_engaged", "value")])
+               Input('f_stepper_input', 'children')
+               ], [State('deltaJog_slider','value'), State("f_stepper_engaged", "value")])
 def update(btn1, btn2, btn3, btnBRIGHT, btn4, btn5, btn6, btn7, btn8, fpos_target, fpos_delta, engaged):
-    if engaged and with_f_stepper:
     
+    if engaged and with_f_stepper:
+    	
+        ctx = dash.callback_context
+
+
+        min_fpos=df_params.loc[1,'fpos_min']
+        max_fpos=df_params.loc[1,'fpos_max']
+        current_fpos=df_params.loc[1,'fpos'] 
+        next_fpos=current_fpos
+
+        scale_factor=10
+        
+        
         try:
-            
-            min_fpos=df_params.loc[1,'fpos_min']
-            max_fpos=df_params.loc[1,'fpos_max']
-            current_fpos=df_params.loc[1,'fpos'] #
-            #print("current_fpos: ",current_fpos)
-            next_fpos=current_fpos
-            
-            ctx = dash.callback_context
             if not ctx.triggered:
-                button_id = 'No clicks yet'
+            	button_id = 'No clicks yet'
             else:
-                button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            	button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            	
+            	print("click %s"%button_id)
+ 
 
+            if button_id == 'btn-plus':
+                print('*')
+
+                next_fpos=current_fpos+scale_factor*(10 ** (1+fpos_delta))
+                #print('** next_fpos=',next_fpos,' [',min_fpos,',',max_fpos,']')
                 
-            if button_id == 'btn-minus':
-                next_fpos=current_fpos+(10 ** fpos_delta)
-                #print((next_fpos-df_params['fpos_min'][1]))
                 #if (next_fpos-df_params['fpos_min'][1])>max_fpos:
-                #    next_fpos=max_fpos
-                print("jog- %s -> %s"%(int(10 ** fpos_delta), int(next_fpos*10)/10))
+                if next_fpos>max_fpos:
+                    next_fpos=max_fpos
+                    print('- max_fpos!')
+                elif next_fpos<min_fpos:
+                    next_fpos=min_fpos
+                    print('- min_fpos!')
+                #else:
+                print('jog minus: next_fpos=',next_fpos)
+                   
+                F_STEPPER_moveTo(next_fpos)
 
-            elif button_id == 'btn-plus':
+            elif button_id == 'btn-minus':
+
+                next_fpos=current_fpos-scale_factor*(10 ** (1+fpos_delta))
+                #print('** next_fpos=',next_fpos)
                 
-                next_fpos=current_fpos-(10 ** fpos_delta)
-                #if next_fpos<min_fpos:
-                #    next_fpos=min_fpos
-                print("jog+ %s -> %s"%(int(10 ** fpos_delta), int(next_fpos*10)/10))
-
+                #if (next_fpos-df_params['fpos_min'][1])>max_fpos:
+                if next_fpos>max_fpos:
+                    next_fpos=max_fpos
+                    #print('+ max_fpos!')
+                elif next_fpos<min_fpos:
+                    next_fpos=min_fpos
+                    #print('+ min_fpos!')
+                #else:
+                    #print('jog plus: next_fpos=',next_fpos)
+                F_STEPPER_moveTo(next_fpos)
 
             elif button_id == 'btn-filterBRIGHT':
-                next_fpos=df_params.loc[1,'fpos_filterBRIGHT']    
+                next_fpos=df_params.loc[1,'fpos_filterBRIGHT']
+                F_STEPPER_moveTo(next_fpos)
             elif button_id == 'btn-filterDARK':
                 next_fpos=df_params.loc[1,'fpos_filterDARK']
+                F_STEPPER_moveTo(next_fpos)
             elif button_id == 'btn-filterGFP':
                 next_fpos=df_params.loc[1,'fpos_filterGFP']
+                F_STEPPER_moveTo(next_fpos)
             elif button_id == 'btn-filterRFP':
                 next_fpos=df_params.loc[1,'fpos_filterRFP']
+                F_STEPPER_moveTo(next_fpos)
             elif button_id == 'btn-filterCFP':
                 next_fpos=df_params.loc[1,'fpos_filterCFP']
+                F_STEPPER_moveTo(next_fpos)
             elif button_id == 'btn-filterYFP':
                 next_fpos=df_params.loc[1,'fpos_filterYFP']
-                
+                F_STEPPER_moveTo(next_fpos)
+
             elif button_id == 'btn-home':
                 fpos_home=F_STEPPER_setHome()
-                next_fpos=current_fpos
-            else:
-                next_fpos=current_fpos
+                
+                #Default: Goto bright
+                #next_fpos=df_params.loc[1,'fpos_filterBRIGHT']
+                #F_STEPPER_moveTo(next_fpos)
+                #next_fpos=0
+                #df_params['fpos'][1]=0
+            #else:
+                #df_params['fpos'][1]=current_fpos
 
-            
+
         except PhidgetException as e:
             print("Error in Detach Event:", e)
             return
         except Exception as e:
+            print("*",e)
             return
-  
-        if next_fpos!=current_fpos:
-            df_params.loc[1,'fpos']=next_fpos
-            F_STEPPER_moveTo(next_fpos)  
-            
-    return df_params.to_json() 
 
-	
-############# 
+    #    if next_fpos!=current_fpos:
+        df_params.loc[1,'fpos']=next_fpos
+            
+
+    return df_params.to_json()
+
+
+#############
 @app.callback(Output('fpos_DARK', 'children'),
               [Input('btn-set-DARK', 'n_clicks')], [State('fpos_var','children')])
 def update(btn, cached_data):
     if btn is not None:
         fpos_current=df_params['fpos'][1] #f_stepper.getPosition() #
         df_params.loc[1,'fpos_filterDARK']=fpos_current
-        print("Set fpos_DARK to ",fpos_current)
+        #print("Set fpos_DARK to ",fpos_current)
     else:
         fpos_current=df_params.loc[1,'fpos_filterDARK']
     return fpos_current
 
-############# 
+#############
 @app.callback(Output('fpos_BRIGHT', 'children'),
               [Input('btn-set-BRIGHT', 'n_clicks')], [State('fpos_var','children')])
 def update(btn, cached_data):
     if btn is not None:
         fpos_current=df_params['fpos'][1] #f_stepper.getPosition() #
         df_params.loc[1,'fpos_filterBRIGHT']=fpos_current
-        print("Set fpos_BRIGHT to ",fpos_current)
+        #print("Set fpos_BRIGHT to ",fpos_current)
     else:
         fpos_current=df_params.loc[1,'fpos_filterBRIGHT']
     return fpos_current
-	
+
 @app.callback(Output('fpos_GFP', 'children'),
               [Input('btn-set-GFP', 'n_clicks')], [State('fpos_var','children')])
 def update(btn, cached_data):
 	if btn is not None:
 		fpos_current=df_params['fpos'][1] #f_stepper.getPosition() #
 		df_params.loc[1,'fpos_filterGFP']=fpos_current
-		print("Set fpos_GFP to ",fpos_current)
+		#print("Set fpos_GFP to ",fpos_current)
 	else:
 		fpos_current=df_params.loc[1,'fpos_filterGFP']
 	return fpos_current
-	
+
 @app.callback(Output('fpos_RFP', 'children'),
               [Input('btn-set-RFP', 'n_clicks')], [State('fpos_var','children')])
 def update(btn, cached_data):
 	if btn is not None:
 		fpos_current=df_params['fpos'][1] #f_stepper.getPosition() #
 		df_params.loc[1,'fpos_filterRFP']=fpos_current
-		print("Set fpos_RFP to ",fpos_current)
+		#print("Set fpos_RFP to ",fpos_current)
 	else:
 		fpos_current=df_params.loc[1,'fpos_filterRFP']
 	return fpos_current
-	
+
 @app.callback(Output('fpos_CFP', 'children'),
               [Input('btn-set-CFP', 'n_clicks')], [State('fpos_var','children')])
 def update(btn, cached_data):
 	if btn is not None:
 		fpos_current=df_params['fpos'][1] #f_stepper.getPosition() #
 		df_params.loc[1,'fpos_filterCFP']=fpos_current
-		print("Set fpos_CFP to ",fpos_current)
+		#print("Set fpos_CFP to ",fpos_current)
 	else:
 		fpos_current=df_params.loc[1,'fpos_filterCFP']
 	return fpos_current
-	
+
 @app.callback(Output('fpos_YFP', 'children'),
               [Input('btn-set-YFP', 'n_clicks')], [State('fpos_var','children')])
 def update(btn, cached_data):
 	if btn is not None:
 		fpos_current=df_params['fpos'][1] #f_stepper.getPosition() #
 		df_params.loc[1,'fpos_filterYFP']=fpos_current
-		print("Set fpos_YFP to ",fpos_current)
+		#print("Set fpos_YFP to ",fpos_current)
 	else:
 		fpos_current=df_params.loc[1,'fpos_filterYFP']
 	return fpos_current
-    
-    
-    
+
+
+
 #######################################
 
 
@@ -1608,38 +1813,38 @@ def update(ncycles, maxcycles, timelapse_start):
         if maxcycles is not None:
             if isinstance(timelapse_start, list):
                 timelapse_start=timelapse_start[0]
-                
+
             if timelapse_start>0:
                 ret=10*ncycles/int(maxcycles)
                 if ret>10:
                     ret=10
     return ret
 
-    
 
-#######################################    
-    
+
+#######################################
+
 @app.callback(Output('runOne_output', 'children'),
               [Input('btn-runOne', 'n_clicks')], [State('tbl_opt_config', 'data'),
-      State('filterBRIGHT_slider','value'), State('filterDARK_slider','value'), State('filterGFP_slider','value'), State('filterRFP_slider','value'), State('filterCFP_slider','value'), State('filterYFP_slider','value'), State('z_stepper_engaged','value'), State('f_stepper_engaged','value')])
-def update(btn, list_opt_configs, exposureBRIGHT, exposureDARK, exposureGFP, exposureRFP, exposureCFP, exposureYFP, z_stepper_engaged, f_stepper_engaged):
-    
-    
+      State('filterBRIGHT_slider','value'), State('filterDARK_slider','value'), State('filterGFP_slider','value'), State('filterRFP_slider','value'), State('filterCFP_slider','value'), State('filterYFP_slider','value'), State('z_stepper_engaged','value'), State('f_stepper_engaged','value'),State('current_temperature', 'value'),State('current_humidity', 'value')])
+def update(btn, list_opt_configs, exposureBRIGHT, exposureDARK, exposureGFP, exposureRFP, exposureCFP, exposureYFP, z_stepper_engaged, f_stepper_engaged, this_temperature, this_humidity):
+
+
     if btn is not None:
-        
+
         for this_row in list_opt_configs:
             opt_configs=[]
             all_rows=this_row['opt_config-1'].split(' / ')
             for this_row in all_rows:
                 opt_config=dict()
-                
-                
+
+
                 st=this_row.split(' (')
                 this_filter=st[0].strip()
                 this_exposure=float(st[1].split('s')[0].strip())
-                
-                
-            
+
+
+
                 if this_filter == 'BRIGHT':
                     opt_config['channelID']='BRIGHT'
                     opt_config['ledOutput']=df_params.loc[1,'output_filterBRIGHT']
@@ -1648,14 +1853,13 @@ def update(btn, list_opt_configs, exposureBRIGHT, exposureDARK, exposureGFP, exp
                     opt_config['exposure']=this_exposure #transform_value(exposureBRIGHT)
                     #shoot_single(opt_config)
                     opt_configs.append(opt_config)
-            
+
                 if this_filter == 'DARK':
-                    
-                    this_color=st[1].split('s')[1][1:].split(',')[0].strip()   
+
+                    this_color=st[1].split('s')[1][1:].split(',')[0].strip()
                     this_alpha=float(this_row.split(',')[2][3:-1])
                     #print("*%s*%s*"%(this_color,this_alpha))
-                
-                    
+
                     opt_config['channelID']='DARK'
                     opt_config['ledOutput']=df_params.loc[1,'output_filterDARK']
                     opt_config['ledColor']=this_color
@@ -1699,22 +1903,23 @@ def update(btn, list_opt_configs, exposureBRIGHT, exposureDARK, exposureGFP, exp
                     opt_config['exposure']=this_exposure #transform_value(exposureYFP)
                     #shoot_single(opt_config)
                     opt_configs.append(opt_config)
-            
+
             #print(len(opt_configs),"*** ",opt_configs)
             if len(opt_configs)>1:
-                shoot_multilight(opt_configs)  #Here we shoot!  
-                
-            elif len(opt_configs)==1:
-                shoot_single(opt_configs[0])
-        print("Run 1 finished")
+                shoot_multilight(opt_configs, this_temperature, this_humidity)  #Here we shoot!
 
-            
+            elif len(opt_configs)==1:
+                shoot_single(opt_configs[0], this_temperature, this_humidity)
+                
+        #print("Run 1 finished")
+
+
 @app.callback([Output('timelapse_start', 'children'), Output('timelapse_end', 'children')],
               [Input('btn-runtimelapse', 'n_clicks')], [State("timelapse_t", "n_intervals"),State("cycles_input", "value"),State('interval_input','value'),State('incubator_checkbox','value')  ])
 def update(btn, t_start, ncycles_input, interval_input, incubate):
     ret_start=-1
     ret_end=-1
-    
+
     if btn is not None:
         if isinstance(interval_input,str) and int(interval_input)>0:
             #if isinstance(ncycles_input,str) and int(ncycles_input)>0:
@@ -1732,8 +1937,8 @@ def update(btn, t_start, ncycles_input, interval_input, incubate):
               [Input('btn-stop', 'n_clicks')], [State("timelapse_t", "n_intervals")])
 def update(btn, t_stop):
     return int(t_stop)
-        
-    
+
+
 @app.callback(Output('timelapse_click', 'children'),
               [Input('btn-click', 'n_clicks')], [State("interfaceKit_engaged", "value")])
 def update(btn, engaged):
@@ -1745,139 +1950,115 @@ def update(btn, engaged):
 
 ####################################### timelapse
 
- 
+
 @app.callback([Output('ncycles_input','children'), Output('timer_input', 'children')],
               [Input("timelapse_t", "n_intervals")],
               [State('tbl_opt_config', 'data'),
-      State('filterBRIGHT_slider','value'),State('filterDARK_slider','value'), State('filterGFP_slider','value'), State('filterRFP_slider','value'), State('filterCFP_slider','value'), State('filterYFP_slider','value'), State("interval_input", "value"), State("interfaceKit_engaged", "value"), State("timelapse_start","children"), State("timelapse_end","children"), State("timelapse_stop","children"), State('incubator_checkbox','value')]) 
-    
-def listener_x(t_timelapse, list_opt_configs, exposureBRIGHT, exposureDARK, exposureGFP, exposureRFP, exposureCFP, exposureYFP, interval_timelapse, engaged, t_start, t_end, t_stop, incubate): 
+      State('filterBRIGHT_slider','value'),State('filterDARK_slider','value'), State('filterGFP_slider','value'), State('filterRFP_slider','value'), State('filterCFP_slider','value'), State('filterYFP_slider','value'), State("interval_input", "value"), State("interfaceKit_engaged", "value"), State("timelapse_start","children"), State("timelapse_end","children"), State("timelapse_stop","children"), State('incubator_checkbox','value'), State('current_temperature', 'value'), State('current_humidity', 'value')])
+
+def listener_x(t_timelapse, list_opt_configs, exposureBRIGHT, exposureDARK, exposureGFP, exposureRFP, exposureCFP, exposureYFP, interval_timelapse, engaged, t_start, t_end, t_stop, incubate, this_temperature, this_humidity):
     ti=0
     ncycles=0
-    
+
     try:
-        if isinstance(t_start,int) and t_start>0:
-            if isinstance(t_end,int) and t_timelapse<t_end:
-                if t_stop==(t_timelapse-1):
-                    print('> Time-lapse stopped')
-                    
-                    
-                    #ToDo. Here we turn off incubator
-                    if incubate:
-                        print('> Turning-off incubator')
-                        
-                elif t_stop<t_start:
-                    
-                    
-                    #Here we do timelapse
-                    t_timelapse_start=int(t_timelapse)-int(t_start)-2
-                    if interval_timelapse is not None:
-                        ncycles=int(t_timelapse_start/int(interval_timelapse))+1
-                        if engaged:
-                            ti=int(interval_timelapse)*ncycles-t_timelapse_start-1
-                        else:
-                            ti=int(interval_timelapse)*ncycles-t_timelapse_start-1 #Tmp (Should be 0)
-                    else:
-                        ti=0
-                    
-                    
-                    #Define optical configurations
-                    for this_row in list_opt_configs:
-                        opt_configs=[]
-                        all_rows=this_row['opt_config-1'].split(' / ')
-                        for this_row in all_rows:
-                            opt_config=dict()
-
-                            st=this_row.split(' (')
-                            this_filter=st[0].strip()
-                            this_exposure=float(st[1].split('s')[0].strip())
-                            this_color=st[1].split('s')[1][1:].split(')')[0].strip()
-
-                            if this_filter == 'DARK':
-                                opt_config['channelID']='DARK'
-                                opt_config['ledOutput']=df_params.loc[1,'output_filterDARK']
-                                opt_config['ledColor']=this_color
-                                opt_config['filterPos']=df_params.loc[1,'fpos_filterDARK']
-                                opt_config['exposure']=transform_value(exposureDARK)
-                                #shoot_single(opt_config)
-                                opt_configs.append(opt_config)
-                                
-                            if this_filter == 'BRIGHT':
-                                opt_config['channelID']='BRIGHT'
-                                opt_config['ledOutput']=df_params.loc[1,'output_filterBRIGHT']
-                                opt_config['ledColor']='BRIGHT'
-                                opt_config['filterPos']=df_params.loc[1,'fpos_filterBRIGHT']
-                                opt_config['exposure']=transform_value(exposureBRIGHT)
-                                #shoot_single(opt_config)
-                                opt_configs.append(opt_config)
-
-                            if this_filter == 'GFP':
-                                opt_config['channelID']='GFP'
-                                opt_config['ledOutput']=df_params.loc[1,'output_filterGFP']
-                                opt_config['ledColor']='GREEN'
-                                opt_config['filterPos']=df_params.loc[1,'fpos_filterGFP']
-                                opt_config['exposure']=transform_value(exposureGFP)
-                                #shoot_single(opt_config)
-                                opt_configs.append(opt_config)
-
-                            if this_filter == 'RFP':
-                                opt_config['channelID']='RFP'
-                                opt_config['ledOutput']=df_params.loc[1,'output_filterRFP']
-                                opt_config['ledColor']='RED'
-                                opt_config['filterPos']=df_params.loc[1,'fpos_filterRFP']
-                                opt_config['exposure']=transform_value(exposureRFP)
-                                #shoot_single(opt_config)
-                                opt_configs.append(opt_config)
-
-                            if this_filter == 'CFP':
-                                opt_config['channelID']='CFP'
-                                opt_config['ledOutput']=df_params.loc[1,'output_filterCFP']
-                                opt_config['ledColor']='CYAN'
-                                opt_config['filterPos']=df_params.loc[1,'fpos_filterCFP']
-                                opt_config['exposure']=transform_value(exposureCFP)
-                                #shoot_single(opt_config)
-                                opt_configs.append(opt_config)
-
-                            if this_filter == 'YFP':
-                                opt_config['channelID']='YFP'
-                                opt_config['ledOutput']=df_params.loc[1,'output_filterYFP']
-                                opt_config['ledColor']='YELLOW'
-                                opt_config['filterPos']=df_params.loc[1,'fpos_filterYFP']
-                                opt_config['exposure']=transform_value(exposureYFP)
-                                #shoot_single(opt_config)
-                                opt_configs.append(opt_config)
-                                
-                            
-
-                        if ti==int(interval_timelapse) or ti==0:  #Here we shoot!  
-                            if len(opt_configs)>1:
-                                shoot_multilight(opt_configs) 
+        if int(interval_timelapse)>0:
+            if isinstance(t_start,int) and t_start>0:
+                if isinstance(t_end,int) and t_timelapse<t_end:
+                    if t_stop==(t_timelapse-1):
+                        print('> Time-lapse stopped')
+    
+                    elif t_stop<t_start:
+    
+    
+                        #Here we do timelapse
+                        t_timelapse_start=int(t_timelapse)-int(t_start)-2
+                        if interval_timelapse is not None:
+                            ncycles=int(t_timelapse_start/int(interval_timelapse))+1
+                            if engaged:
+                                ti=int(interval_timelapse)*ncycles-t_timelapse_start-1
                             else:
-                                shoot_multichannel(opt_configs)    
-                    if (t_timelapse+1)==int(t_end):
-                        print('> Time-lapse finished')
-                        print('> Turning-off incubator')
-                
-
+                                ti=int(interval_timelapse)*ncycles-t_timelapse_start-1 #Tmp (Should be 0)
+                        else:
+                            ti=0
+    
+    
+                        #Define optical configurations
+                        for this_row in list_opt_configs:
+                            opt_configs=[]
+                            all_rows=this_row['opt_config-1'].split(' / ')
+                            for this_row in all_rows:
+                                opt_config=dict()
+    
+                                st=this_row.split(' (')
+                                this_filter=st[0].strip()
+                                this_exposure=float(st[1].split('s')[0].strip())
+                                this_color=st[1].split('s')[1][1:].split(')')[0].strip()
+    
+                                if this_filter == 'DARK':
+                                    opt_config['channelID']='DARK'
+                                    opt_config['ledOutput']=df_params.loc[1,'output_filterDARK']
+                                    opt_config['ledColor']=this_color
+                                    opt_config['filterPos']=df_params.loc[1,'fpos_filterDARK']
+                                    opt_config['exposure']=transform_value(exposureDARK)
+                                    opt_configs.append(opt_config)
+    
+                                if this_filter == 'BRIGHT':
+                                    opt_config['channelID']='BRIGHT'
+                                    opt_config['ledOutput']=df_params.loc[1,'output_filterBRIGHT']
+                                    opt_config['ledColor']='BRIGHT'
+                                    opt_config['filterPos']=df_params.loc[1,'fpos_filterBRIGHT']
+                                    opt_config['exposure']=transform_value(exposureBRIGHT)
+                                    opt_configs.append(opt_config)
+    
+                                if this_filter == 'GFP':
+                                    opt_config['channelID']='GFP'
+                                    opt_config['ledOutput']=df_params.loc[1,'output_filterGFP']
+                                    opt_config['ledColor']='GREEN'
+                                    opt_config['filterPos']=df_params.loc[1,'fpos_filterGFP']
+                                    opt_config['exposure']=transform_value(exposureGFP)
+                                    opt_configs.append(opt_config)
+    
+                                if this_filter == 'RFP':
+                                    opt_config['channelID']='RFP'
+                                    opt_config['ledOutput']=df_params.loc[1,'output_filterRFP']
+                                    opt_config['ledColor']='RED'
+                                    opt_config['filterPos']=df_params.loc[1,'fpos_filterRFP']
+                                    opt_config['exposure']=transform_value(exposureRFP)
+                                    opt_configs.append(opt_config)
+    
+                                if this_filter == 'CFP':
+                                    opt_config['channelID']='CFP'
+                                    opt_config['ledOutput']=df_params.loc[1,'output_filterCFP']
+                                    opt_config['ledColor']='CYAN'
+                                    opt_config['filterPos']=df_params.loc[1,'fpos_filterCFP']
+                                    opt_config['exposure']=transform_value(exposureCFP)
+                                    opt_configs.append(opt_config)
+    
+                                if this_filter == 'YFP':
+                                    opt_config['channelID']='YFP'
+                                    opt_config['ledOutput']=df_params.loc[1,'output_filterYFP']
+                                    opt_config['ledColor']='YELLOW'
+                                    opt_config['filterPos']=df_params.loc[1,'fpos_filterYFP']
+                                    opt_config['exposure']=transform_value(exposureYFP)
+                                    opt_configs.append(opt_config)
+    
+    
+    
+                            if ti==int(interval_timelapse) or ti==0:  #Here we shoot!
+                                if len(opt_configs)>1:
+                                    shoot_multilight(opt_configs, this_temperature, this_humidity)
+                                else:
+                                    shoot_multichannel(opt_configs, this_temperature, this_humidity)
+                        if (t_timelapse+1)==int(t_end):
+                            print('> Time-lapse finished')
+    
+    
     except Exception as e:
         print("Error in timelapse:",e)
-     
-    return [ncycles, ti]
-        
-    
-@app.callback(Output('f_stepper_input', 'children'),
-              [Input("listener", "n_intervals")],
-              [State("interfaceKit_engaged", "value"),State("fpos_var", "children")])
-def listener_x(_, connection, cached_data):
-    
-    ret=df_params.loc[1,'fpos']
-    
-    return ret
 
-    
-    
-    
-        
+    return [ncycles, ti]
+
+
 #######################################
 
 ##################################### MAIN
