@@ -23,7 +23,7 @@ Step-by-step assembly instructions can be found [here](http://www.penamiller.com
 
 [MIT](https://choosealicense.com/licenses/mit/)
 
-This project is licensed under the MIT License - see the LICENSE.txt file for details. Hardware is lincesed under the CERN license.
+This project is licensed under the MIT License - see the license.txt file for details. Hardware is lincesed under the CERN license.
 
 
 ## Aknowledgements
