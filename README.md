@@ -15,13 +15,13 @@ This device uses a system of addressable LEDs and fluorescence filters to estima
 
 ## Documentation
 
-Step-by-step assembly instructions can be found [here](http://www.penamiller.com/lab/baffle/)<br>
+Step-by-step assembly instructions can be found [here](http://www.penamiller.com/lab/baffle/).<br>
 
-List of components can be found [here](https://penamiller.com/lab/baffle/XLS/BAFFLEdoc_parts.xlsx)
+List of components can be found [here](https://penamiller.com/lab/baffle/XLS/BAFFLEdoc_parts.xlsx).
 
 ## Authors
 
-- [@Systems Biology Lab, CCG-UNAM](https://github.com/ccg-esb-lab)
+[@Systems Biology Lab, CCG-UNAM](https://github.com/ccg-esb-lab)
 
 
 ## License
