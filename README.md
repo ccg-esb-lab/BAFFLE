@@ -5,6 +5,7 @@ Repository for: <br><br>
 **BAFFLE: A 3D printable device for macroscopic quantification of fluorescent bacteria in space and time**<br>
 _Carles Tardío Pi, Daniela Reyes-González, Andrea Fernández-Duque, Ayari Fuentes-Hernández, Fernando Santos-Escobar, and Rafael Peña-Miller_.
 
+[![DOI](https://zenodo.org/badge/274222088.svg)](https://zenodo.org/badge/latestdoi/274222088)
 
 ## Overview
 
