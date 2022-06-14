@@ -2,7 +2,7 @@
 # BAFFLE - Bionic Apparatus For Fluorescent Light Estimation
 
 Repository for: 
-**BAFFLE: A 3D printable device for macroscopic quantification of fluorescent bacteria in space and time**
+**BAFFLE: A 3D printable device for macroscopic quantification of fluorescent bacteria in space and time**<br>
 _Carles Tardío Pi, Daniela Reyes-González, Andrea Fernández-Duque, Ayari Fuentes-Hernández, Fernando Santos-Escobar, and Rafael Peña-Miller_.
 
 
