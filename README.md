@@ -19,7 +19,9 @@ Step-by-step assembly instructions can be found [here](http://www.penamiller.com
 
 List of components can be found [here](https://penamiller.com/lab/baffle/XLS/BAFFLEdoc_parts.xlsx).
 
-Data used to produce figures included in the manuscript can be found in [data/](data/). Images were analyzed using ImageJ macros and Matlab scripts that can be found in [macros/](macros/).
+Data used to produce figures included in the manuscript can be found in [data/](data/). 
+
+ImageJ macros and Matlab scripts used to analyze these images can be found in [macros/](macros/).
 
 ## Authors
 
