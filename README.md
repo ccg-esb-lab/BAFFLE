@@ -19,6 +19,8 @@ Step-by-step assembly instructions can be found [here](http://www.penamiller.com
 
 List of components can be found [here](https://penamiller.com/lab/baffle/XLS/BAFFLEdoc_parts.xlsx).
 
+Images and scripts used to produce the figures of the manuscript can be found in [macros/](macros/)
+
 ## Authors
 
 [@Systems Biology Lab, CCG-UNAM](https://github.com/ccg-esb-lab)
