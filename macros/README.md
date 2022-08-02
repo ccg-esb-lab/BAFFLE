@@ -19,4 +19,4 @@ Raw data: [data/Figure_timelapse/](../data/Figure_timelapse/)
 Macro: _Figure_expansion.ijm_ <br/>
 Raw data: [data/Figure_expansion/](../data/Figure_expansion/)
 
-Plots were generated using Matlab using the following script _runMe.m_
+Plots were generated in Matlab using the following script _runMe.m_
