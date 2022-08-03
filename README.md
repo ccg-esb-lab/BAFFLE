@@ -32,7 +32,7 @@ ImageJ macros and Matlab scripts used to analyze these images can be found in [m
 
 [MIT](https://choosealicense.com/licenses/mit/)
 
-This project is licensed under the MIT License - see the license.txt file for details. Hardware is lincesed under the CERN license.
+This project is licensed under the MIT License - see the [license.txt](../license.txt) file for details. Hardware is lincesed under the CERN license.
 
 
 ## Aknowledgements
