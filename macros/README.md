@@ -20,3 +20,10 @@ Macro: _Figure_expansion.ijm_ <br/>
 Raw data: [data/Figure_expansion/](../data/Figure_expansion/)
 
 Plots were generated in Matlab using the following script _runMe.m_
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+This project is licensed under the MIT License - see the license.txt file for details. Hardware is lincesed under the CERN license.
