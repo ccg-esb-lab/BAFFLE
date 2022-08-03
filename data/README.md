@@ -14,3 +14,11 @@ Raw data: [data/Figure_timelapse/](../data/Figure_timelapse/)
 
 *Figure 6* <br/>
 Raw data: [data/Figure_expansion/](../data/Figure_expansion/)
+
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+This project is licensed under the MIT License - see the [license.txt](../license.txt) file for details. Hardware is lincesed under the CERN license.
